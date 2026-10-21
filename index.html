@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulir Permohonan Kredit</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:Inter,sans-serif;background:#f8fafc;color:#1e293b}
+  .in{width:100%;padding:.6rem .9rem;border:1px solid #cbd5e1;border-radius:.5rem;background:#fff;outline:none;font-size:14px}
+  .in:focus{border-color:#2563eb;box-shadow:0 0 0 2px #bfdbfe}
+  .in[readonly]{background:#f1f5f9;color:#475569}
+  .lb{display:block;font-size:13px;font-weight:500;margin-bottom:4px}
+  .pad{position:relative;height:150px;background:#fff;border:2px dashed #cbd5e1;border-radius:.75rem;overflow:hidden;touch-action:none;cursor:crosshair}
+  .pad canvas{width:100%;height:100%}
+  .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:13px;pointer-events:none}
+  .err{color:#dc2626;font-size:12px;font-weight:500;margin-top:4px}
+</style>
+</head>
+<body class="py-8 px-4">
+<div class="max-w-4xl mx-auto">
+
+  <!-- ===== FORM ===== -->
+  <div id="formSection">
+    <header class="text-center mb-8">
+      <h1 class="text-3xl font-extrabold">Formulir Permohonan Kredit</h1>
+      <p class="mt-2 text-slate-600">Lengkapi data berikut dengan benar. Tanda bintang (*) wajib diisi.</p>
+    </header>
+
+    <form id="f" class="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-10 space-y-8" novalidate>
+      <div id="groups" class="space-y-8"></div>
+
+      <section>
+        <h2 class="text-lg font-bold mb-3">Foto KTP <span class="text-red-500">*</span></h2>
+        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+          <img id="ktpPrev" class="w-28 h-36 object-cover rounded-lg border hidden" alt="Pratinjau KTP">
+          <div>
+            <input type="file" id="ktpInput" accept="image/jpeg,image/png,image/webp">
+            <p class="text-xs text-slate-500 mt-2">JPG / PNG / WEBP, maksimal 5 MB. Ukuran akan dikecilkan otomatis.</p>
+            <p id="ktpErr" class="err hidden"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <h2 class="text-base font-bold mb-2">Pernyataan</h2>
+        <p class="text-sm text-slate-700">Atas permohonan dan data yang saya berikan, Bank diijinkan untuk mengakses informasi keuangan milik saya dan pihak terkait dalam Sistem Layanan Informasi Keuangan (SLIK) Otoritas Jasa Keuangan (OJK).</p>
+        <label class="flex items-start gap-3 mt-3 cursor-pointer">
+          <input type="checkbox" id="agree" class="mt-1 w-4 h-4">
+          <span class="text-sm font-medium">Saya telah membaca dan menyetujui pernyataan di atas. <span class="text-red-500">*</span></span>
+        </label>
+        <p id="agreeErr" class="err hidden">Centang persetujuan terlebih dahulu.</p>
+      </section>
+
+      <section class="grid md:grid-cols-2 gap-6">
+        <div>
+          <div class="flex justify-between mb-1"><span class="lb">Tanda Tangan Pemohon <span class="text-red-500">*</span></span>
+            <button type="button" class="text-xs text-red-600 font-semibold" onclick="p1.clear()">Hapus</button></div>
+          <div class="pad"><canvas id="c1"></canvas><div id="ph1" class="ph">Goreskan tanda tangan di sini</div></div>
+          <p id="sigErr" class="err hidden">Tanda tangan pemohon wajib diisi.</p>
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><span class="lb">Tanda Tangan Suami / Istri / Orang Tua</span>
+            <button type="button" class="text-xs text-red-600 font-semibold" onclick="p2.clear()">Hapus</button></div>
+          <div class="pad"><canvas id="c2"></canvas><div id="ph2" class="ph">Opsional</div></div>
+        </div>
+      </section>
+
+      <div class="pt-4 border-t text-center">
+        <button type="submit" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg">Simpan &amp; Tampilkan Review</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== REVIEW ===== -->
+  <div id="reviewSection" class="hidden">
+    <div id="status" class="mb-4 p-4 rounded-xl border text-sm font-medium"></div>
+    <div class="mb-4 flex flex-wrap justify-between gap-3 bg-white p-4 rounded-xl shadow border">
+      <button onclick="editForm()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 font-semibold rounded-lg text-sm">← Edit Data Kembali</button>
+      <button onclick="document.getElementById('frame').contentWindow.print()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm">Cetak / Simpan PDF</button>
+    </div>
+    <iframe id="frame" class="w-full bg-white border rounded-xl shadow" style="height:1180px" title="Review formulir"></iframe>
+  </div>
+</div>
+
+<script src="kredit-print.js"></script>
+<script>
+/* ============ KONFIGURASI ============ */
+const API_URL = 'GANTI_DENGAN_URL_WEB_APP_KREDIT/exec';   // URL Apps Script (akhiran /exec)
+
+/* ============ STATE ============ */
+const $ = id => document.getElementById(id);
+let ktp = '', submissionId = null, lastPayload = null, busy = false;
+
+/* ============ BANGUN FORM DARI SKEMA ============ */
+const fid = h => 'f_' + h.replace(/\W/g, '_');
+function fieldHtml([h, label, type, opts, req, full]) {
+  const attr = `id="${fid(h)}" data-h="${h}" data-t="${type}" ${req ? 'required' : ''}`;
+  let el;
+  if (type === 'select')
+    el = `<select class="in" ${attr}><option value="">-- Pilih --</option>${opts.map(o => `<option>${o}</option>`).join('')}</select>` +
+      (opts.includes('Lainnya') ? `<input class="in hidden mt-2" data-other placeholder="Sebutkan lainnya">` : '');
+  else if (type === 'textarea') el = `<textarea class="in" rows="2" ${attr}></textarea>`;
+  else if (type === 'terbilang') el = `<input class="in" readonly placeholder="Terisi otomatis" ${attr}>`;
+  else if (type === 'date') el = `<input class="in" type="date" ${attr}>`;
+  else el = `<input class="in" type="text" ${['rupiah', 'number', 'tel'].includes(type) ? 'inputmode="numeric"' : ''} ${type === 'tel' ? 'maxlength="13"' : ''} ${attr}>`;
+  return `<div class="${full ? 'md:col-span-2' : ''}"><label class="lb">${label}${req ? ' <span class="text-red-500">*</span>' : ''}</label>${el}</div>`;
+}
+$('groups').innerHTML = KREDIT_GROUPS.map(g =>
+  `<section><h2 class="text-lg font-bold mb-3">${g.t}</h2><div class="grid md:grid-cols-2 gap-4">${g.f.map(fieldHtml).join('')}</div></section>`).join('');
+
+$('groups').addEventListener('input', e => {
+  const el = e.target, t = el.dataset.t;
+  if (t === 'rupiah') {
+    const d = el.value.replace(/\D/g, '');
+    el.value = d ? Number(d).toLocaleString('id-ID') : '';
+    if (el.dataset.h === 'Pinjaman Diajukan') $(fid('Terbilang')).value = terbilang(d);
+  } else if (t === 'number' || t === 'tel') {
+    el.value = el.value.replace(/\D/g, '').slice(0, t === 'tel' ? 13 : 12);
+  }
+});
+
+/* Pilih "Lainnya" -> tampilkan kolom isian manual */
+$('groups').addEventListener('change', e => {
+  const sel = e.target, other = sel.nextElementSibling;
+  if (sel.tagName !== 'SELECT' || !other || !('other' in other.dataset)) return;
+  const on = sel.value === 'Lainnya';
+  other.classList.toggle('hidden', !on);
+  if (!on) other.value = '';
+});
+
+/* Tanggal pengajuan default = hari ini (boleh diubah) */
+$(fid('Tanggal Pengajuan')).value = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+
+/* ============ FOTO KTP ============ */
+const show = (id, msg) => { const e = $(id); e.textContent = msg || e.textContent; e.classList.remove('hidden'); };
+function compress(dataUrl, max, type = 'image/jpeg') {
+  return new Promise(res => {
+    const i = new Image();
+    i.onload = () => {
+      const s = Math.min(1, max / Math.max(i.width, i.height)), c = document.createElement('canvas');
+      c.width = Math.round(i.width * s); c.height = Math.round(i.height * s);
+      c.getContext('2d').drawImage(i, 0, 0, c.width, c.height);
+      res(c.toDataURL(type, .8));
+    };
+    i.onerror = () => res('');
+    i.src = dataUrl;
+  });
+}
+$('ktpInput').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  $('ktpErr').classList.add('hidden');
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) return show('ktpErr', 'Format harus JPG, PNG, atau WEBP.');
+  if (f.size > 5 * 1048576) return show('ktpErr', 'Ukuran file maksimal 5 MB.');
+  const r = new FileReader();
+  r.onload = ev => { ktp = ev.target.result; $('ktpPrev').src = ktp; $('ktpPrev').classList.remove('hidden'); };
+  r.readAsDataURL(f);
+});
+
+/* ============ PAD TANDA TANGAN ============ */
+function makePad(cid, phid) {
+  const c = $(cid), x = c.getContext('2d'), o = { signed: false };
+  let drawing = false;
+  const size = () => {
+    const r = c.getBoundingClientRect(); if (!r.width) return;
+    const keep = o.signed ? c.toDataURL() : null;
+    c.width = r.width; c.height = r.height;
+    x.lineWidth = 2.5; x.lineCap = x.lineJoin = 'round'; x.strokeStyle = '#0f172a';
+    if (keep) { const i = new Image(); i.onload = () => x.drawImage(i, 0, 0, r.width, r.height); i.src = keep; }
+  };
+  const pos = e => { const r = c.getBoundingClientRect(), t = e.touches ? e.touches[0] : e; return [t.clientX - r.left, t.clientY - r.top]; };
+  const start = e => { e.preventDefault(); drawing = true; const [px, py] = pos(e); x.beginPath(); x.moveTo(px, py); $(phid).classList.add('hidden'); o.signed = true; };
+  const move = e => { if (!drawing) return; e.preventDefault(); const [px, py] = pos(e); x.lineTo(px, py); x.stroke(); };
+  const end = () => { drawing = false; };
+  c.addEventListener('mousedown', start); c.addEventListener('mousemove', move);
+  c.addEventListener('mouseup', end); c.addEventListener('mouseleave', end);
+  c.addEventListener('touchstart', start, { passive: false });
+  c.addEventListener('touchmove', move, { passive: false }); c.addEventListener('touchend', end);
+  o.clear = () => { x.clearRect(0, 0, c.width, c.height); o.signed = false; $(phid).classList.remove('hidden'); };
+  o.data = () => c.toDataURL('image/png');
+  o.size = size;
+  return o;
+}
+const p1 = makePad('c1', 'ph1'), p2 = makePad('c2', 'ph2');
+const resizePads = () => { p1.size(); p2.size(); };
+window.addEventListener('load', resizePads);
+window.addEventListener('resize', resizePads);
+
+/* ============ KIRIM KE GOOGLE SHEET ============ */
+async function kirim(data) {
+  lastPayload = data;
+  try {
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'create', data }) });
+    return (await res.json()).success === true;
+  } catch (err) { console.error('Gagal mengirim:', err); return false; }
+}
+function tampilStatus(s) {
+  const b = $('status');
+  const style = { loading: 'bg-amber-50 border-amber-200 text-amber-800', ok: 'bg-emerald-50 border-emerald-200 text-emerald-800', gagal: 'bg-red-50 border-red-200 text-red-800' };
+  b.className = 'mb-4 p-4 rounded-xl border text-sm font-medium ' + style[s];
+  b.innerHTML = s === 'loading' ? 'Menyimpan data...'
+    : s === 'ok' ? 'Data berhasil tersimpan.'
+    : '<div class="flex flex-wrap items-center justify-between gap-3"><span>Data GAGAL tersimpan. Periksa koneksi internet, lalu kirim ulang.</span><button type="button" onclick="kirimUlang()" class="px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold">Kirim Ulang</button></div>';
+}
+async function kirimUlang() {
+  if (!lastPayload || busy) return;
+  busy = true; tampilStatus('loading');
+  tampilStatus((await kirim(lastPayload)) ? 'ok' : 'gagal');
+  busy = false;
+}
+
+/* ============ SUBMIT ============ */
+$('f').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (busy) return;
+  ['ktpErr', 'sigErr', 'agreeErr'].forEach(id => $(id).classList.add('hidden'));
+
+  const bad = [...document.querySelectorAll('[data-h][required]')].find(el => !el.value.trim());
+  if (bad) { bad.focus(); bad.scrollIntoView({ behavior: 'smooth', block: 'center' }); alert('Lengkapi semua isian bertanda *.'); return; }
+  const badOther = [...document.querySelectorAll('[data-other]')].find(el => !el.classList.contains('hidden') && !el.value.trim());
+  if (badOther) { badOther.focus(); badOther.scrollIntoView({ behavior: 'smooth', block: 'center' }); alert('Isi kolom "Sebutkan lainnya".'); return; }
+  if (!ktp) { show('ktpErr', 'Foto KTP wajib diupload.'); $('ktpErr').scrollIntoView({ block: 'center' }); return; }
+  if (!$('agree').checked) { show('agreeErr'); $('agreeErr').scrollIntoView({ block: 'center' }); return; }
+  if (!p1.signed) { show('sigErr'); $('sigErr').scrollIntoView({ block: 'center' }); return; }
+
+  busy = true;
+  submissionId = submissionId || (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+  const data = { 'Submission ID': submissionId };
+  document.querySelectorAll('[data-h]').forEach(el => {
+    let val = el.value.trim();
+    const other = el.nextElementSibling;
+    if (val === 'Lainnya' && other && 'other' in other.dataset) val = 'Lainnya: ' + other.value.trim();
+    data[el.dataset.h] = val || '-';
+  });
+  data['Terbilang'] = terbilang((data['Pinjaman Diajukan'] || '').replace(/\D/g, '')) || '-';
+  data['Foto KTP'] = await compress(ktp, 1200);
+  if (!data['Foto KTP']) { busy = false; show('ktpErr', 'Foto gagal diproses. Pilih ulang foto.'); return; }
+  data['Tanda Tangan'] = p1.data();
+  data['Tanda Tangan 2'] = p2.signed ? p2.data() : '';
+
+  // Tampilkan review dulu, lalu kirim
+  $('frame').srcdoc = buildKreditPrint({ ...data, Timestamp: new Date().toISOString() },
+    { ktp: data['Foto KTP'], ttd: data['Tanda Tangan'], ttd2: data['Tanda Tangan 2'] });
+  $('formSection').classList.add('hidden');
+  $('reviewSection').classList.remove('hidden');
+  window.scrollTo({ top: 0 });
+
+  tampilStatus('loading');
+  tampilStatus((await kirim(data)) ? 'ok' : 'gagal');
+  busy = false;
+});
+
+function editForm() {
+  submissionId = null;                       // edit ulang = pengajuan baru
+  $('reviewSection').classList.add('hidden');
+  $('formSection').classList.remove('hidden');
+  requestAnimationFrame(resizePads);
+}
+</script>
+</body>
+</html>
