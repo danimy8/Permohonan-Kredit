@@ -37,7 +37,7 @@
           <img id="ktpPrev" class="w-28 h-36 object-cover rounded-lg border hidden" alt="Pratinjau KTP">
           <div>
             <input type="file" id="ktpInput" accept="image/jpeg,image/png,image/webp">
-            <p class="text-xs text-slate-500 mt-2">JPG / PNG / WEBP, maksimal 5 MB. Ukuran akan dikecilkan otomatis.</p>
+            <p class="text-xs text-slate-500 mt-2">JPG / PNG / WEBP, maksimal 2 MB.</p>
             <p id="ktpErr" class="err hidden"></p>
           </div>
         </div>
@@ -148,11 +148,25 @@ function compress(dataUrl, max, type = 'image/jpeg') {
     i.src = dataUrl;
   });
 }
+const MAX_KTP = 2 * 1048576; // 2 MB
+
+function resetKtp() {
+  ktp = '';
+  $('ktpInput').value = '';
+  $('ktpPrev').src = '';
+  $('ktpPrev').classList.add('hidden');
+}
+
 $('ktpInput').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   $('ktpErr').classList.add('hidden');
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) return show('ktpErr', 'Format harus JPG, PNG, atau WEBP.');
-  if (f.size > 5 * 1048576) return show('ktpErr', 'Ukuran file maksimal 5 MB.');
+  resetKtp(); // buang foto lama supaya tidak ikut terkirim kalau file baru ditolak
+
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type))
+    return show('ktpErr', 'Format harus JPG, PNG, atau WEBP.');
+  if (f.size > MAX_KTP)
+    return show('ktpErr', `Ukuran file ${(f.size / 1048576).toFixed(2)} MB, maksimal 2 MB.`);
+
   const r = new FileReader();
   r.onload = ev => { ktp = ev.target.result; $('ktpPrev').src = ktp; $('ktpPrev').classList.remove('hidden'); };
   r.readAsDataURL(f);
