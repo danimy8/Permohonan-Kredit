@@ -9,7 +9,7 @@ const KREDIT_GROUPS = [
   { t: 'Pinjaman', f: [
     ['Pinjaman Diajukan', 'Pinjaman Diajukan (Rp)', 'rupiah', 0, 1],
     ['Terbilang', 'Terbilang', 'terbilang', 0, 0, 1],
-    ['Jangka Waktu', 'Jangka Waktu (bulan)', 'number', 0, 1],
+    ['Jangka Waktu', 'Jangka Waktu (bulan)', 'select', Array.from({ length: 12 }, (_, i) => String(i + 1)), 1],
     ['Sanggup Mengangsur', 'Sanggup Mengangsur (Rp / bulan)', 'rupiah', 0, 1],
   ]},
   { t: 'Data Pemohon', f: [
@@ -35,12 +35,12 @@ const KREDIT_GROUPS = [
     ['Lama Menempati', 'Lama Menempati Rumah', 'text'],
     ['Alamat KTP', 'Alamat Sesuai KTP (jika berbeda)', 'textarea', 0, 0, 1],
   ]},
-  { t: 'Keluarga / Kerabat yang Dapat Dihubungi (opsional)', f: [
-    ['Kerabat Nama', 'Nama', 'text'],
-    ['Kerabat No HP', 'No. HP', 'tel'],
-    ['Kerabat Alamat', 'Alamat', 'textarea', 0, 0, 1],
-    ['Kerabat Hubungan', 'Hubungan', 'text'],
-  ]},
+   { t: 'Keluarga / Kerabat yang Dapat Dihubungi', f: [
+     ['Kerabat Nama', 'Nama', 'text', 0, 1],
+     ['Kerabat No HP', 'No. HP', 'tel', 0, 1],
+     ['Kerabat Alamat', 'Alamat', 'textarea', 0, 1, 1],  
+     ['Kerabat Hubungan', 'Hubungan', 'select', ['Orang Tua', 'Suami/Istri', 'Anak', 'Saudara', 'Lainnya'], 1],
+   ]},
   { t: 'Penggunaan Pinjaman', f: [
     ['Tujuan Pinjaman', 'Pinjaman untuk', 'select', ['Modal Usaha', 'Investasi', 'Konsumtif', 'Lainnya'], 1],
     ['Usaha Utama', 'Usaha Utama', 'text'],
@@ -54,13 +54,12 @@ const KREDIT_GROUPS = [
     ['Status Jaminan', 'Status Jaminan', 'select', ['Milik', 'Bukan milik'], 1],
     ['Jaminan Digunakan Oleh', 'Jaminan Digunakan Oleh', 'select', ['Sendiri', 'Orang lain'], 1],
     ['Hubungan Pemilik', 'Hubungan dengan Pemilik', 'select', ['Orang Tua', 'Anak', 'Lainnya']],
-    ['Jumlah Jaminan', 'Jumlah Jaminan', 'text'],
+    ['Jumlah Jaminan', 'Jumlah Jaminan', 'number'],
     ['Nama Jaminan', 'Nama Jaminan', 'text'],
   ]},
-  { t: 'Tanggal & Penandatangan', f: [
-    ['Tanggal Pengajuan', 'Tanggal', 'date', 0, 1],
-    ['Nama TTD 2', 'Nama Suami / Istri / Orang Tua (penanda tangan)', 'text', 0, 0, 1],
-  ]},
+  { t: 'Penandatangan', f: [
+    ['Nama TTD 2', 'Nama Suami / Istri / Orang Tua (penanda tangan, jika ada)', 'text', 0, 0, 1],
+   ]},
 ];
 
 const kEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g,
