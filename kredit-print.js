@@ -123,9 +123,12 @@ body{font-family:Arial,sans-serif;font-size:8.5px;color:#111;margin:0}
 .v{border-bottom:1px dotted #555;font-weight:600;word-break:break-word;min-height:12px}
 .sub{margin-top:4px;font-size:8px}
 .stm{font-size:8px;line-height:1.35}
-.sgw{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #222;margin:4px -6px -3px}
+.rc{padding-bottom:0;display:flex;flex-direction:column}
+.rc .blk:last-child{flex:1;display:flex;flex-direction:column;padding-bottom:0}
+.rc .sgw{flex:1}
+.sgw{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #222;margin:4px -6px 0}
 .sg{display:flex;flex-direction:column}.sg+.sg{border-left:1px solid #222}
-.sb{height:62px;display:flex;align-items:center;justify-content:center}
+.sb{flex:1;min-height:62px;display:flex;align-items:center;justify-content:center}
 .sb img{max-width:90%;max-height:58px}.sn{text-align:center;font-size:8px;padding:1px}
 .sl{text-align:center;border-top:1px solid #222;padding:2px;font-size:8.5px}
 .adm{display:flex;align-items:flex-end;gap:6px;padding-right:10%}
@@ -135,13 +138,18 @@ table{width:100%;border-collapse:collapse;font-size:7.5px}
 td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
 .ft{margin-top:6px}
 </style></head><body>
-<div class="hd"><svg viewBox="0 0 800 100" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
-  <rect width="800" height="100" fill="#2e9b3a"/>
-  <polygon points="0,0 540,0 528,46 0,100" fill="#fff"/>
-  <ellipse cx="78" cy="50" rx="62" ry="32" fill="#f6c400" stroke="#1f3c88" stroke-width="5" transform="rotate(-12 78 50)"/>
-  <text x="78" y="70" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-weight="700" font-size="64" fill="#d9342b" stroke="#fff" stroke-width="1.5">A</text>
-  <text x="165" y="52" font-family="Arial,sans-serif" font-weight="800" font-size="31" fill="#1f3c88">BANK ARAYA ARTA</text>
-  <text x="780" y="82" text-anchor="end" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="#1b5e6b">PERMOHONAN KREDIT</text>
+<div class="hd"><svg viewBox="0 0 800 84" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <rect width="800" height="84" fill="#34a03c"/>
+  <polygon points="0,0 438,0 432,34 0,80" fill="#fff"/>
+  <g transform="rotate(-14 84 42)">
+    <ellipse cx="84" cy="42" rx="62" ry="24" fill="#f4bd1b"/>
+    <ellipse cx="84" cy="42" rx="62" ry="24" fill="none" stroke="#2a4fa6" stroke-width="3.5"/>
+    <ellipse cx="84" cy="42" rx="50" ry="12" fill="none" stroke="#2a4fa6" stroke-width="2" transform="rotate(28 84 42)"/>
+  </g>
+  <path d="M34 64 Q70 76 126 58" fill="none" stroke="#d9342b" stroke-width="3" stroke-linecap="round"/>
+  <text x="86" y="60" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-weight="700" font-size="62" fill="#d9342b" stroke="#fff" stroke-width="1.2" paint-order="stroke">A</text>
+  <text x="166" y="36" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="25" fill="#2a4fa6">BANK ARAYA ARTA</text>
+  <text x="790" y="56" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="13" fill="#1c5a78">PERMOHONAN KREDIT</text>
 </svg></div>
 
 <div class="g2" style="border-top:1px solid #222">
@@ -162,7 +170,7 @@ td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
     <div class="blk"><div class="t">Keluarga/ Kerabat yang dapat dihubungi</div>
       ${R('Nama', 'Kerabat Nama')}${R('No HP', 'Kerabat No HP')}${R('Alamat', 'Kerabat Alamat')}${R('Hubungan', 'Kerabat Hubungan')}</div>
   </div>
-  <div class="c">
+  <div class="c rc">
     <div class="blk"><div class="t">PENGGUNAAN</div>
       ${R('Pinjaman untuk', 'Tujuan Pinjaman')}${R('Usaha Utama', 'Usaha Utama')}${R('Usaha Tambahan', 'Usaha Tambahan')}
       ${row('Mulai Usaha/ Bekerja', 'Tahun ' + v('Mulai Usaha/Bekerja'))}${R('No. NPWP (jika ada)', 'NPWP')}${R('Pinjaman Bank lain', 'Pinjaman Bank Lain')}</div>
