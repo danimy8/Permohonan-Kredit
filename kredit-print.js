@@ -138,18 +138,26 @@ table{width:100%;border-collapse:collapse;font-size:7.5px}
 td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
 .ft{margin-top:6px}
 </style></head><body>
-<div class="hd"><svg viewBox="0 0 800 84" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
-  <rect width="800" height="84" fill="#34a03c"/>
-  <polygon points="0,0 438,0 432,34 0,80" fill="#fff"/>
-  <g transform="rotate(-14 84 42)">
-    <ellipse cx="84" cy="42" rx="62" ry="24" fill="#f4bd1b"/>
-    <ellipse cx="84" cy="42" rx="62" ry="24" fill="none" stroke="#2a4fa6" stroke-width="3.5"/>
-    <ellipse cx="84" cy="42" rx="50" ry="12" fill="none" stroke="#2a4fa6" stroke-width="2" transform="rotate(28 84 42)"/>
+<div class="hd"><svg viewBox="0 0 977 92" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <!-- latar hijau -->
+  <rect width="977" height="92" fill="#2e9e3a"/>
+  <rect x="330" width="647" height="92" fill="#34a03c"/>
+  <!-- panel putih miring -->
+  <polygon points="0,0 332,0 322,40 0,92" fill="#fff"/>
+  <!-- logo -->
+  <g transform="rotate(-14 62 44)">
+    <ellipse cx="62" cy="44" rx="46" ry="19" fill="#f4bd1b"/>
+    <ellipse cx="62" cy="44" rx="46" ry="19" fill="none" stroke="#2a4fa6" stroke-width="3"/>
+    <ellipse cx="62" cy="44" rx="37" ry="9" fill="none" stroke="#2a4fa6" stroke-width="1.8" transform="rotate(28 62 44)"/>
   </g>
-  <path d="M34 64 Q70 76 126 58" fill="none" stroke="#d9342b" stroke-width="3" stroke-linecap="round"/>
-  <text x="86" y="60" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-weight="700" font-size="62" fill="#d9342b" stroke="#fff" stroke-width="1.2" paint-order="stroke">A</text>
-  <text x="166" y="36" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="25" fill="#2a4fa6">BANK ARAYA ARTA</text>
-  <text x="790" y="56" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="13" fill="#1c5a78">PERMOHONAN KREDIT</text>
+  <path d="M26 66 Q56 77 98 60" fill="none" stroke="#d9342b" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="64" y="60" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-weight="700" font-size="50" fill="#d9342b" stroke="#fff" stroke-width="1" paint-order="stroke">A</text>
+  <text x="62" y="86" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="7" letter-spacing="1.5" fill="#2a4fa6">BPR ARAYA ARTA</text>
+  <!-- identitas perusahaan -->
+  <text x="124" y="32" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="19" fill="#2a4fa6">PT. BPR ARAYA ARTA</text>
+  <text x="130" y="52" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="11" fill="#2a4fa6">JL. HM. SARBINI 87 KEBUMEN</text>
+  <!-- judul -->
+  <text x="655" y="54" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="28" letter-spacing="1" fill="#fff">PEMOHON KREDIT</text>
 </svg></div>
 
 <div class="g2" style="border-top:1px solid #222">
