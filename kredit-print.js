@@ -35,11 +35,11 @@ const KREDIT_GROUPS = [
     ['Lama Menempati', 'Lama Menempati Rumah', 'text'],
     ['Alamat KTP', 'Alamat Sesuai KTP (jika berbeda)', 'textarea', 0, 0, 1],
   ]},
-  { t: 'Keluarga / Kerabat yang Dapat Dihubungi', f: [
-    ['Kerabat Nama', 'Nama', 'text', 0, 1],
-    ['Kerabat No HP', 'No. HP', 'tel', 0, 1],
-    ['Kerabat Alamat', 'Alamat', 'textarea', 0, 1, 1],
-    ['Kerabat Hubungan', 'Hubungan', 'text', 0, 1],
+  { t: 'Keluarga / Kerabat yang Dapat Dihubungi (opsional)', f: [
+    ['Kerabat Nama', 'Nama', 'text'],
+    ['Kerabat No HP', 'No. HP', 'tel'],
+    ['Kerabat Alamat', 'Alamat', 'textarea', 0, 0, 1],
+    ['Kerabat Hubungan', 'Hubungan', 'text'],
   ]},
   { t: 'Penggunaan Pinjaman', f: [
     ['Tujuan Pinjaman', 'Pinjaman untuk', 'select', ['Modal Usaha', 'Investasi', 'Konsumtif', 'Lainnya'], 1],
@@ -104,8 +104,8 @@ function buildKreditPrint(r, img, auto) {
     (isNaN(lahirD) ? '' : lahirD.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
   const checklist = ['FC KTP Suami/Istri', 'FC Kartu Keluarga', 'FC Buku Nikah', 'FC Agunan (Sertifikat, BPKB, dll)',
     'FC SIUP/TDP/Ket. Usaha', 'FC Bukti Bayar (PLN, PDAM, Telepon, dll)', 'FC Rekening Deposito, Tabungan, dll', 'Lainnya'];
-  const sig = (src, nama) => `<div class="sg"><div class="sb">${src ? `<img src="${src}" alt="">` : ''}</div>
-    <div class="sn">( ${kEsc(clean(nama))} )</div></div>`;
+  const sig = (src, nama, lbl) => `<div class="sg"><div class="sb">${src ? `<img src="${src}" alt="">` : ''}</div>
+    <div class="sn">( ${kEsc(clean(nama))} )</div><div class="sl">${lbl}</div></div>`;
 
   return `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">
 <title>Permohonan Kredit - ${v('Nama Lengkap')}</title>
@@ -114,6 +114,7 @@ function buildKreditPrint(r, img, auto) {
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{font-family:Arial,sans-serif;font-size:8.5px;color:#111;margin:0}
 .bn{width:100%;display:block}
+.hd{border:1px solid #222;border-bottom:0;line-height:0}
 .g2{display:grid;grid-template-columns:1fr 1fr;border:1px solid #222;border-top:0}
 .c{padding:3px 6px}.c+.c{border-left:1px solid #222}
 .c .blk{border-bottom:1px solid #222;margin:0 -6px;padding:3px 6px}.c .blk:last-child{border-bottom:0}
@@ -122,17 +123,26 @@ body{font-family:Arial,sans-serif;font-size:8.5px;color:#111;margin:0}
 .v{border-bottom:1px dotted #555;font-weight:600;word-break:break-word;min-height:12px}
 .sub{margin-top:4px;font-size:8px}
 .stm{font-size:8px;line-height:1.35}
-.sgw{display:grid;grid-template-columns:1fr 1fr;border:1px solid #222;margin:4px -6px -3px}
-.sg+.sg{border-left:1px solid #222}.sb{height:62px;display:flex;align-items:center;justify-content:center}
+.sgw{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #222;margin:4px -6px -3px}
+.sg{display:flex;flex-direction:column}.sg+.sg{border-left:1px solid #222}
+.sb{height:62px;display:flex;align-items:center;justify-content:center}
 .sb img{max-width:90%;max-height:58px}.sn{text-align:center;font-size:8px;padding:1px}
-.lbl{display:grid;grid-template-columns:1fr 1fr;text-align:center;border-top:1px solid #222;margin:0 -6px -3px}
-.lbl span{padding:2px}.lbl span+span{border-left:1px solid #222}
+.sl{text-align:center;border-top:1px solid #222;padding:2px;font-size:8.5px}
+.adm{display:flex;align-items:flex-end;gap:6px;padding-right:10%}
+.adm i{flex:1;border-bottom:1px dotted #555;height:12px}
 .ln{border-bottom:1px dotted #555;height:17px}
 table{width:100%;border-collapse:collapse;font-size:7.5px}
 td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
 .ft{margin-top:6px}
 </style></head><body>
-<img class="bn" src="${abs('header-kredit.png')}" onerror="this.onerror=null;this.src='${abs('header-bpr.png')}'" alt="">
+<div class="hd"><svg viewBox="0 0 800 100" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <rect width="800" height="100" fill="#2e9b3a"/>
+  <polygon points="0,0 540,0 528,46 0,100" fill="#fff"/>
+  <ellipse cx="78" cy="50" rx="62" ry="32" fill="#f6c400" stroke="#1f3c88" stroke-width="5" transform="rotate(-12 78 50)"/>
+  <text x="78" y="70" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-weight="700" font-size="64" fill="#d9342b" stroke="#fff" stroke-width="1.5">A</text>
+  <text x="165" y="52" font-family="Arial,sans-serif" font-weight="800" font-size="31" fill="#1f3c88">BANK ARAYA ARTA</text>
+  <text x="780" y="82" text-anchor="end" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="#1b5e6b">PERMOHONAN KREDIT</text>
+</svg></div>
 
 <div class="g2" style="border-top:1px solid #222">
   <div class="c">${row('Pinjaman diajukan', 'Rp ' + v('Pinjaman Diajukan'))}${row('Jangka waktu', v('Jangka Waktu') + ' bulan')}${row('Sanggup mengangsur', 'Rp ' + v('Sanggup Mengangsur') + ' /bulan')}</div>
@@ -161,15 +171,14 @@ td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
       ${R('Hubungan dengan pemilik', 'Hubungan Pemilik')}${R('Jumlah jaminan', 'Jumlah Jaminan')}${R('Nama jaminan', 'Nama Jaminan')}</div>
     <div class="blk stm">Atas permohonan dan data yang saya berikan, Bank diijinkan untuk mengakses informasi keuangan milik saya dan pihak terkait dalam Sistem Layanan Informasi Keuangan (SLIK) Otoritas Jasa Keuangan (OJK)</div>
     <div class="blk">Tanggal : ${kEsc(tgl)}
-      <div class="sgw">${sig(img.ttd, r['Nama Lengkap'])}${sig(img.ttd2, r['Nama TTD 2'])}</div>
-      <div class="lbl"><span>Pemohon</span><span>Suami/Istri/Orang Tua</span></div></div>
+      <div class="sgw">${sig(img.ttd, r['Nama Lengkap'], 'Pemohon')}${sig(img.ttd2, r['Nama TTD 2'], 'Suami/Istri/Orang Tua')}</div></div>
   </div>
 </div>
 
 <div class="g2">
   <div class="c">
     <div class="t">DI ISI OLEH BANK</div>
-    ${row('Nama Marketing', '')}${row('Catatan Administrasi', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lama / Baru')}
+    ${row('Nama Marketing', '')}<div class="r"><span>Catatan Administrasi</span><span>:</span><span class="adm"><i></i><b>Lama / Baru</b></span></div>
     <p class="stm" style="margin:4px 0">Dengan menandatangani formulir ini, saya menyatakan telah melakukan verifikasi dan konfirmasi data pemohon.</p>
     <div style="margin-top:8px">Catatan Lainnya :</div><div class="ln"></div><div class="ln"></div><div class="ln"></div>
   </div>
@@ -180,4 +189,89 @@ td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
 <img class="bn ft" src="${abs('banner-bpr.png')}" alt="">
 ${auto ? '<script>window.onload=function(){setTimeout(function(){window.print()},500)}<\/script>' : ''}
 </body></html>`;
+}
+
+
+/* =====================================================================
+   Helper form bersama (dipakai dashboard untuk Tambah / Edit data)
+   ===================================================================== */
+const kId = (pre, h) => pre + h.replace(/\W/g, '_');
+
+function kFieldHtml([h, l, t, o, req, full], pre) {
+  const a = `id="${kId(pre, h)}" data-h="${kEsc(h)}" data-t="${t}" ${req ? 'required' : ''}`;
+  let el;
+  if (t === 'select')
+    el = `<select ${a}><option value="">-- Pilih --</option>${o.map(x => `<option>${kEsc(x)}</option>`).join('')}</select>` +
+      (o.includes('Lainnya') ? '<input class="other" data-other hidden placeholder="Sebutkan lainnya">' : '');
+  else if (t === 'textarea') el = `<textarea rows="2" ${a}></textarea>`;
+  else if (t === 'terbilang') el = `<input readonly placeholder="Terisi otomatis" ${a}>`;
+  else if (t === 'date') el = `<input type="date" ${a}>`;
+  else el = `<input type="text" ${['rupiah', 'number', 'tel'].includes(t) ? 'inputmode="numeric"' : ''} ${a}>`;
+  return `<div class="field ${full ? 'full' : ''}"><label>${kEsc(l)}${req ? ' *' : ''}</label>${el}</div>`;
+}
+
+/* Pasang perilaku: format rupiah, hanya angka, terbilang otomatis, kolom "Lainnya" */
+function kBind(root) {
+  root.addEventListener('input', e => {
+    const el = e.target, t = el.dataset.t;
+    if (t === 'rupiah') {
+      const d = el.value.replace(/\D/g, '');
+      el.value = d ? Number(d).toLocaleString('id-ID') : '';
+      if (el.dataset.h === 'Pinjaman Diajukan') { const tb = root.querySelector('[data-h="Terbilang"]'); if (tb) tb.value = terbilang(d); }
+    } else if (t === 'number' || t === 'tel') el.value = el.value.replace(/\D/g, '').slice(0, t === 'tel' ? 13 : 12);
+  });
+  root.addEventListener('change', e => {
+    const s = e.target, o = s.nextElementSibling;
+    if (s.tagName !== 'SELECT' || !o || !('other' in o.dataset)) return;
+    o.hidden = s.value !== 'Lainnya';
+    if (o.hidden) o.value = '';
+  });
+}
+
+/* Ambil semua isian -> { data, bad } ; bad = elemen wajib yang masih kosong */
+function kCollect(root) {
+  const data = {}; let bad = null;
+  root.querySelectorAll('[data-h]').forEach(el => {
+    let v = el.value.trim();
+    const o = el.nextElementSibling;
+    if (v === 'Lainnya' && o && 'other' in o.dataset) { if (!o.value.trim()) bad = bad || o; v = 'Lainnya: ' + o.value.trim(); }
+    if (el.required && !v) bad = bad || el;
+    data[el.dataset.h] = v || '-';
+  });
+  data['Terbilang'] = terbilang((data['Pinjaman Diajukan'] || '').replace(/\D/g, '')) || '-';
+  return { data, bad };
+}
+
+/* Isi form dari satu record (r = null untuk form kosong) */
+function kFill(root, r) {
+  root.querySelectorAll('[data-h]').forEach(el => {
+    let v = r ? r[el.dataset.h] : '';
+    v = (v == null || v === '-') ? '' : String(v);
+    if (el.dataset.t === 'date') v = v.slice(0, 10);
+    const o = el.nextElementSibling, has = o && 'other' in o.dataset;
+    if (el.tagName === 'SELECT' && /^Lainnya: /.test(v) && has) { el.value = 'Lainnya'; o.hidden = false; o.value = v.slice(9); return; }
+    el.value = v;
+    if (has) { o.hidden = true; o.value = ''; }
+  });
+}
+
+/* File gambar -> data URL JPEG yang sudah dikecilkan */
+function kCompress(file, max) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onerror = () => rej(new Error('Gagal membaca file.'));
+    fr.onload = () => {
+      const i = new Image();
+      i.onerror = () => rej(new Error('File gambar rusak.'));
+      i.onload = () => {
+        const sc = Math.min(1, max / Math.max(i.width, i.height)), c = document.createElement('canvas');
+        c.width = Math.round(i.width * sc); c.height = Math.round(i.height * sc);
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+        x.drawImage(i, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', .85));
+      };
+      i.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
 }
