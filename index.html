@@ -21,6 +21,7 @@
   .pad{touch-action:none;position:relative;height:150px;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:.75rem;overflow:hidden;cursor:crosshair}
   .pad canvas{width:100%;height:100%;display:block}
   .pad .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:.8rem;pointer-events:none}
+  .pad .ph.hidden{display:none}
 </style>
 </head>
 <body class="min-h-screen text-slate-800 antialiased py-8 px-4">
@@ -38,7 +39,7 @@
       <div id="fields" class="space-y-8"></div>
       <section>
         <h2 class="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-200">Foto KTP <span class="text-red-500">*</span></h2>
-        <div class="flex flex-col sm:flex-row items-center gap-5 p-4 bg-slate-50 ronded-xl border border-dashed border-slate-300">
+        <div class="flex flex-col sm:flex-row items-center gap-5 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
           <div class="w-40 h-28 bg-slate-200 rounded-lg overflow-hidden flex items-center justify-center border border-slate-300">
             <img id="ktpPreview" class="w-full h-full object-cover hidden" alt="Foto KTP">
             <i id="ktpPh" class="fa-solid fa-id-card text-3xl text-slate-400"></i>
@@ -138,6 +139,7 @@ function makePad(cv, ph) {
   cv.addEventListener('pointermove', e => { if (!drawing) return; c.lineTo(...pos(e)); c.stroke(); });
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => cv.addEventListener(t, () => drawing = false));
   size();
+  window.addEventListener('resize', () => { if (!signed) size(); });
   return {
     signed: () => signed,
     clear: () => { c.clearRect(0, 0, cv.width, cv.height); signed = false; ph.classList.remove('hidden'); },
