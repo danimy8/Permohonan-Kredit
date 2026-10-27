@@ -137,7 +137,7 @@ table{width:100%;border-collapse:collapse;font-size:7.5px}
 td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
 .ft{margin-top:6px}
 </style></head><body>
-<div class="hd"><svg viewBox="0 0 977 92" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
+<div class="hd"><img class="bn" src="${abs('header-kredit.png')}" alt="PT. BPR Araya Arta - Permohonan Kredit"></div>
   <!-- latar hijau -->
   <rect width="977" height="92" fill="#2e9e3a"/>
   <rect x="330" width="647" height="92" fill="#34a03c"/>
