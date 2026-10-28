@@ -38,22 +38,9 @@
     <form id="kreditForm" novalidate class="space-y-8">
       <div id="fields" class="space-y-8"></div>
       <section>
-        <h2 class="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-200">Foto KTP <span class="text-red-500">*</span></h2>
-        <div class="flex flex-col sm:flex-row items-center gap-5 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-          <div class="w-40 h-28 bg-slate-200 rounded-lg overflow-hidden flex items-center justify-center border border-slate-300">
-            <img id="ktpPreview" class="w-full h-full object-cover hidden" alt="Foto KTP">
-            <i id="ktpPh" class="fa-solid fa-id-card text-3xl text-slate-400"></i>
-          </div>
-          <div class="space-y-2 text-center sm:text-left">
-            <label for="ktpInput" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer shadow-sm">
-              <i class="fa-solid fa-upload text-green-600"></i> Pilih Foto KTP
-            </label>
-            <input type="file" id="ktpInput" accept="image/jpeg,image/png,image/webp" class="hidden">
-            <p class="text-xs text-slate-500">Format JPG, PNG, atau WEBP. Ukuran dikecilkan otomatis.</p>
-            <button type="button" id="ktpDel" class="hidden text-xs text-red-600 hover:underline font-medium">Hapus Foto</button>
-            <p id="ktpErr" class="hidden text-xs text-red-500 font-medium"></p>
-          </div>
-        </div>
+        <h2 class="text-lg font-bold text-slate-900 mb-1 pb-2 border-b border-slate-200">Mohon Upload Dokumen</h2>
+        <p class="text-xs text-slate-500 mb-4"><b>Foto KTP wajib <span class="text-red-500">*</span></b>. Dokumen lain diupload jika ada. Format JPG, PNG, atau WEBP; ukuran dikecilkan otomatis.</p>
+        <div id="docs" class="grid2"></div>
       </section>
       
       <!-- Pernyataan -->
@@ -155,26 +142,61 @@ document.getElementById('clr2').onclick = pad2.clear;
 const $ = id => document.getElementById(id);
 const msg = t => { const m = $('formMsg'); m.textContent = t; m.classList.toggle('hidden', !t); };
 
-/* ==== Foto KTP ==== */
-let ktpData = '';
-function ktpReset() {
-  ktpData = ''; $('ktpInput').value = '';
-  $('ktpPreview').classList.add('hidden'); $('ktpPh').classList.remove('hidden'); $('ktpDel').classList.add('hidden');
-}
-$('ktpDel').onclick = ktpReset;
-$('ktpInput').addEventListener('change', async e => {
-  const f = e.target.files[0], er = $('ktpErr');
-  er.classList.add('hidden');
-  if (!f) return;
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) { ktpReset(); er.textContent = 'Format harus JPG, PNG, atau WEBP.'; return er.classList.remove('hidden'); }
-  if (f.size > 10 * 1048576) { ktpReset(); er.textContent = 'Ukuran file maksimal 10 MB.'; return er.classList.remove('hidden'); }
-  try {
-    ktpData = await kCompress(f, 1200);         // JPEG, sisi terpanjang 1200px (jauh di bawah batas 2 MB backend)
-    $('ktpPreview').src = ktpData;
-    $('ktpPreview').classList.remove('hidden'); $('ktpPh').classList.add('hidden'); $('ktpDel').classList.remove('hidden');
-  } catch (x) { ktpReset(); er.textContent = x.message; er.classList.remove('hidden'); }
-});
+/* ==== Upload Dokumen ==== */
+const DOKS = [
+  { k: 'Foto KTP', label: 'Foto KTP', req: true },
+  { k: 'Scan Kartu Keluarga', label: 'Scan Kartu Keluarga' },
+  { k: 'Scan Buku Nikah', label: 'Scan Buku Nikah' },
+  { k: 'Scan Agunan', label: 'Scan Agunan (Sertifikat, BPKB, dll)' },
+  { k: 'Scan SIUP-TDP-Ket Usaha', label: 'Scan SIUP/TDP/Ket. Usaha' },
+  { k: 'Scan Bukti Bayar', label: 'Scan Bukti Bayar (PLN, PDAM, Telepon, dll)' },
+  { k: 'Scan Rekening Deposito', label: 'Scan Rekening Deposito, dll' },
+  { k: 'Scan Dokumen Lainnya', label: 'Lainnya', other: true },
+];
+const DOC_OK = ['image/jpeg', 'image/png', 'image/webp'];
+const docData = {};
 
+$('docs').innerHTML = DOKS.map((d, i) => `
+  <div class="p-3 bg-slate-50 rounded-xl border border-dashed border-slate-300 ${d.other ? 'md:col-span-2' : ''}">
+    <p class="text-sm font-medium text-slate-700 mb-2">${kEsc(d.label)}${d.req ? ' <span class="text-red-500">*</span>' : ''}</p>
+    ${d.other ? '<input type="text" id="docName" placeholder="Ketik nama dokumen, mis. Surat Keterangan Gaji" class="w-full px-3 py-2 mb-2 text-sm rounded-lg border border-slate-300 bg-white outline-none focus:ring-2 focus:ring-green-200">' : ''}
+    <div class="flex items-center gap-3">
+      <div class="w-24 h-16 bg-slate-200 rounded-lg overflow-hidden flex items-center justify-center border border-slate-300 shrink-0">
+        <img id="dp${i}" class="w-full h-full object-cover hidden" alt="">
+        <i id="dh${i}" class="fa-solid fa-file-image text-xl text-slate-400"></i>
+      </div>
+      <div class="space-y-1">
+        <label for="di${i}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer shadow-sm">
+          <i class="fa-solid fa-upload text-green-600"></i> Pilih File
+        </label>
+        <input type="file" id="di${i}" accept="image/jpeg,image/png,image/webp" class="hidden">
+        <button type="button" id="dx${i}" class="hidden block text-xs text-red-600 hover:underline font-medium">Hapus</button>
+        <p id="de${i}" class="hidden text-xs text-red-500 font-medium"></p>
+      </div>
+    </div>
+  </div>`).join('');
+
+function docReset(i) {
+  docData[DOKS[i].k] = ''; $('di' + i).value = '';
+  $('dp' + i).classList.add('hidden'); $('dh' +i).classList.remove('hidden'); $('dx' + i).classList.add('hidden');
+}
+DOKS.forEach((d, i) => {
+  docData[d.k] = '';
+  $('dx' + i).onclick = () => docReset(i);
+  $('di' + i).addEventListener('change', async e => {
+    const f = e.target.files[0], er = $('de' + i);
+    er.classList.add('hidden');
+    if (!f) return;
+    if (!DOC_OK.includes(f.type)) { docReset(i); er.textContent = 'Format harus JPG, PNG, atau WEBP.'; return er.classList.remove('hidden'); }
+    if (f.size > 10 * 1048576) { docReset(i); er.textContent = 'Ukuran file maksimal 10 MB.'; return er.classList.remove('hidden'); }
+    try {
+      docData[d.k] = await kCompress(f, 1400);
+      $('dp' + i).src = docData[d.k];
+      $('dp' + i).classList.remove('hidden'); $('dh' + i).classList.add('hidden'); $('dx' + i).classList.remove('hidden');
+    } catch (x) { docReset(i); er.textContent = x.message; er.classList.remove('hidden'); }
+  });
+});
+  
 function tampilStatus(state) {
   const b = $('saveStatus');
   b.className = 'mb-4 p-4 rounded-xl border text-sm font-medium';
@@ -225,12 +247,13 @@ $('kreditForm').addEventListener('submit', async e => {
   }
   if (!$('agree').checked) { $('agreeErr').classList.remove('hidden'); return $('agree').scrollIntoView({ block: 'center' }); }
   if (!pad1.signed()) { $('sig1Err').classList.remove('hidden'); return $('pad1').scrollIntoView({ block: 'center' }); }
-  if (!ktpData) { const er = $('ktpErr'); er.textContent = 'Foto KTP wajib diupload.'; er.classList.remove('hidden'); return $('ktpInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  if (!docData['Foto KTP']) { const er = $('de0'); er.textContent = 'Foto KTP wajib diupload.'; er.classList.remove('hidden'); return $('docs').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  if (docData['Scan Dokumen Lainnya'] && !$('docName').value.trim()) { msg('Ketik nama dokumen untuk file "Lainnya".'); $('docName').focus(); return $('docName').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 
 
   isSubmitting = true;
   data['Tanggal Pengajuan'] = new Date().toLocaleDateString('en-CA');   // YYYY-MM-DD, otomatis
-  const img = { ktp: ktpData, ttd: pad1.data(), ttd2: pad2.data() };
+  const img = { ktp: docData['Foto KTP'], ttd: pad1.data(), ttd2: pad2.data() };
   if (!submissionId) submissionId = (crypto.randomUUID && crypto.randomUUID()) || (Date.now() + '-' + Math.random().toString(36).slice(2));
 
   // tampilkan review
@@ -240,7 +263,7 @@ $('kreditForm').addEventListener('submit', async e => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   tampilStatus('loading');
-  const ok = await kirim({ 'Submission ID': submissionId, ...data, 'Foto KTP': ktpData, 'Tanda Tangan': img.ttd, 'Tanda Tangan 2': img.ttd2 });
+  const ok = await kirim({ 'Submission ID': submissionId, ...data, ...docData, 'Nama Dokumen Lainnya': $('docName').value.trim() || '-', 'Tanda Tangan': img.ttd, 'Tanda Tangan 2': img.ttd2 });
   tampilStatus(ok ? 'ok' : 'gagal');
   isSubmitting = false;
 });
