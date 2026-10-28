@@ -48,6 +48,8 @@ const KREDIT_GROUPS = [
     ['Mulai Usaha/Bekerja', 'Mulai Usaha / Bekerja (Tahun)', 'number'],
     ['NPWP', 'No. NPWP (jika ada)', 'text'],
     ['Pinjaman Bank Lain', 'Pinjaman Bank Lain', 'select', ['Ada', 'Tidak ada'], 1],
+    ['Nama Bank Lain', 'Nama Bank', 'text', 0, 1, 0, ['Pinjaman Bank Lain', 'Ada']],
+    ['Nominal Pinjaman Lain', 'Nominal Pinjaman di Bank Lain (Rp)', 'rupiah', 0, 1, 0, ['Pinjaman Bank Lain', 'Ada']],
   ]},
   { t: 'Jaminan', f: [
     ['Jenis Jaminan', 'Jenis Jaminan', 'select', ['Sertifikat', 'BPKB', 'Deposito', 'Tabungan', 'Lainnya'], 1],
@@ -105,6 +107,9 @@ function buildKreditPrint(r, img, auto) {
     'FC SIUP/TDP/Ket. Usaha', 'FC Bukti Bayar (PLN, PDAM, Telepon, dll)', 'FC Rekening Deposito, Tabungan, dll', 'Lainnya'];
   const sig = (src, nama, lbl) => `<div class="sg"><div class="sb">${src ? `<img src="${src}" alt="">` : ''}</div>
     <div class="sn">( ${kEsc(clean(nama))} )</div><div class="sl">${lbl}</div></div>`;
+  const bankLain = clean(r['Pinjaman Bank Lain']) === 'Ada'
+    ? 'Ada - ' + v('Nama Bank Lain') + ', Rp ' + v('Nominal Pinjaman Lain')
+    : v('Pinjaman Bank Lain');
 
   return `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">
 <title>Permohonan Kredit - ${v('Nama Lengkap')}</title>
@@ -160,7 +165,7 @@ td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
   <div class="c rc">
     <div class="blk"><div class="t">PENGGUNAAN</div>
       ${R('Pinjaman untuk', 'Tujuan Pinjaman')}${R('Usaha Utama', 'Usaha Utama')}${R('Usaha Tambahan', 'Usaha Tambahan')}
-      ${row('Mulai Usaha/ Bekerja', 'Tahun ' + v('Mulai Usaha/Bekerja'))}${R('No. NPWP (jika ada)', 'NPWP')}${R('Pinjaman Bank lain', 'Pinjaman Bank Lain')}</div>
+      ${row('Mulai Usaha/ Bekerja', 'Tahun ' + v('Mulai Usaha/Bekerja'))}${R('No. NPWP (jika ada)', 'NPWP')}${row('Pinjaman Bank lain', bankLain)}</div>
     <div class="blk"><div class="t">JAMINAN</div>
       ${R('Jenis jaminan', 'Jenis Jaminan')}${R('Status jaminan', 'Status Jaminan')}${R('Jaminan digunakan oleh', 'Jaminan Digunakan Oleh')}
       ${R('Hubungan dengan pemilik', 'Hubungan Pemilik')}${R('Jumlah jaminan', 'Jumlah Jaminan')}${R('Nama jaminan', 'Nama Jaminan')}</div>
@@ -192,8 +197,8 @@ ${auto ? '<script>window.onload=function(){setTimeout(function(){window.print()}
    ===================================================================== */
 const kId = (pre, h) => pre + h.replace(/\W/g, '_');
 
-function kFieldHtml([h, l, t, o, req, full], pre) {
-  const a = `id="${kId(pre, h)}" data-h="${kEsc(h)}" data-t="${t}" ${req ? 'required' : ''}`;
+function kFieldHtml([h, l, t, o, req, full, dep], pre) {
+  const a = `id="${kId(pre, h)}" data-h="${kEsc(h)}" data-t="${t}" ${req ? 'data-req="1"' : ''} ${req && !dep ? 'required' : ''}`;
   let el;
   if (t === 'select')
     el = `<select ${a}><option value="">-- Pilih --</option>${o.map(x => `<option>${kEsc(x)}</option>`).join('')}</select>` +
@@ -202,7 +207,20 @@ function kFieldHtml([h, l, t, o, req, full], pre) {
   else if (t === 'terbilang') el = `<input readonly placeholder="Terisi otomatis" ${a}>`;
   else if (t === 'date') el = `<input type="date" ${a}>`;
   else el = `<input type="text" ${['rupiah', 'number', 'tel'].includes(t) ? 'inputmode="numeric"' : ''} ${a}>`;
-  return `<div class="field ${full ? 'full' : ''}"><label>${kEsc(l)}${req ? ' *' : ''}</label>${el}</div>`;
+  const d = dep ? ` data-dep="${kEsc(dep[0])}" data-depval="${kEsc(dep[1])}" hidden` : '';
+  return `<div class="field ${full ? 'full' : ''}"${d}><label>${kEsc(l)}${req ? ' *' : ''}</label>${el}</div>`;
+}
+
+/* Tampilkan / sembunyikan field yang bergantung pada field lain */
+function kDeps(root) {
+   root.querySelectorAll('[data-dep]').forEach(w => {
+      const p = root.querySelector(`[data-h="${w.dataset.dep}"]`);
+      const show = !!p && p.value === w.dataset.depval;
+      w.hidden = !show;
+      const i = w.querySelector('[data-h]');
+      i.required = show && i.dataset.req === '1';
+      if (!show) i.value = '';
+   });
 }
 
 /* Pasang perilaku: format rupiah, hanya angka, terbilang otomatis, kolom "Lainnya" */
@@ -217,6 +235,7 @@ function kBind(root) {
   });
   root.addEventListener('change', e => {
     const s = e.target, o = s.nextElementSibling;
+    if (s.tagName === 'SELECT') kDeps(root);
     if (s.tagName !== 'SELECT' || !o || !('other' in o.dataset)) return;
     o.hidden = s.value !== 'Lainnya';
     if (o.hidden) o.value = '';
@@ -248,6 +267,7 @@ function kFill(root, r) {
     el.value = v;
     if (has) { o.hidden = true; o.value = ''; }
   });
+  kDeps(root);
 }
 
 /* File gambar -> data URL JPEG yang sudah dikecilkan */
