@@ -42,7 +42,7 @@ const KREDIT_GROUPS = [
      ['Kerabat Hubungan', 'Hubungan', 'select', ['Orang Tua', 'Suami/Istri', 'Anak', 'Saudara', 'Lainnya'], 1],
    ]},
   { t: 'Penggunaan Pinjaman', f: [
-    ['Tujuan Pinjaman', 'Pinjaman untuk', 'select', ['Modal Usaha', 'Investasi', 'Konsumtif', 'Lainnya'], 1],
+    ['Tujuan Pinjaman', 'Pinjaman untuk', 'select', ['Modal Usaha', 'Investasi', 'Multiguna', 'Lainnya'], 1],
     ['Usaha Utama', 'Usaha Utama', 'text'],
     ['Usaha Tambahan', 'Usaha Tambahan', 'text'],
     ['Mulai Usaha/Bekerja', 'Mulai Usaha / Bekerja (Tahun)', 'number'],
