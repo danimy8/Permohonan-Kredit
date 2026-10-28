@@ -9,7 +9,7 @@ const KREDIT_GROUPS = [
   { t: 'Pinjaman', f: [
     ['Pinjaman Diajukan', 'Pinjaman Diajukan (Rp)', 'rupiah', 0, 1],
     ['Terbilang', 'Terbilang', 'terbilang', 0, 0, 1],
-    ['Jangka Waktu', 'Jangka Waktu (bulan)', 'select', Array.from({ length: 12 }, (_, i) => String(i + 1)), 1],
+    ['Jangka Waktu', 'Jangka Waktu (bulan)', 'number', 0, 1],
     ['Sanggup Mengangsur', 'Sanggup Mengangsur (Rp / bulan)', 'rupiah', 0, 1],
   ]},
   { t: 'Data Pemohon', f: [
