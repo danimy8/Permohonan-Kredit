@@ -8,14 +8,14 @@
 
 /* [nama kolom di Sheet, label di cetakan] */
 const KREDIT_DOCS = [
-  ['Dok KTP',      'FC KTP Suami/Istri'],
-  ['Dok KK',       'FC Kartu Keluarga'],
-  ['Dok Nikah',    'FC Buku Nikah'],
-  ['Dok Agunan',   'FC Agunan (Sertifikat, BPKB, dll)'],
-  ['Dok Usaha',    'FC SIUP/TDP/Ket. Usaha'],
-  ['Dok Bukti',    'FC Bukti Bayar (PLN, PDAM, Telepon, dll)'],
-  ['Dok Rekening', 'FC Rekening Deposito, Tabungan, dll'],
-  ['Dok Lainnya',  'Lainnya'],
+  ['Foto KTP',                'FC KTP Suami/Istri'],
+  ['Scan Kartu Keluarga',     'FC Kartu Keluarga'],
+  ['Scan Buku Nikah',         'FC Buku Nikah'],
+  ['Scan Agunan',             'FC Agunan (Sertifikat, BPKB, dll)'],
+  ['Scan SIUP-TDP-Ket Usaha', 'FC SIUP/TDP/Ket. Usaha'],
+  ['Scan Bukti Bayar',        'FC Bukti Bayar (PLN, PDAM, Telepon, dll)'],
+  ['Scan Rekening Deposito',  'FC Rekening Deposito, Tabungan, dll'],
+  ['Scan Dokumen Lainnya',    'Lainnya'],
 ];
 const KREDIT_GROUPS = [
   { t: 'Pinjaman', f: [
@@ -195,7 +195,7 @@ td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
   </div>
   <div class="c"><table><tr><td colspan="2"><b>Cek List Dokumen</b></td></tr>
     ${KREDIT_DOCS.map(([k, label]) => {
-      const ada = clean(r[k]) === 'Ya' || (k === 'Dok KTP' && img.ktp);
+      const ada = clean(r[k]) !== '' || (k === 'Foto KTP' && !!img.ktp);
       return `<tr><td>${label}</td><td style="text-align:center;font-weight:700;font-size:10px">${ada ? '✓' : ''}</td></tr>`;
     }).join('')}</table>
     <div style="text-align:center;margin-top:14px">Paraf Marketing</div></div>
