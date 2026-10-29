@@ -5,6 +5,18 @@
    Nama field = nama kolom di Google Sheet.
    Format tiap field: [kolom, label, tipe, opsi, wajib, lebarPenuh]
    ===================================================================== */
+
+/* [nama kolom di Sheet, label di cetakan] */
+const KREDIT_DOCS = [
+  ['Dok KTP',      'FC KTP Suami/Istri'],
+  ['Dok KK',       'FC Kartu Keluarga'],
+  ['Dok Nikah',    'FC Buku Nikah'],
+  ['Dok Agunan',   'FC Agunan (Sertifikat, BPKB, dll)'],
+  ['Dok Usaha',    'FC SIUP/TDP/Ket. Usaha'],
+  ['Dok Bukti',    'FC Bukti Bayar (PLN, PDAM, Telepon, dll)'],
+  ['Dok Rekening', 'FC Rekening Deposito, Tabungan, dll'],
+  ['Dok Lainnya',  'Lainnya'],
+];
 const KREDIT_GROUPS = [
   { t: 'Pinjaman', f: [
     ['Pinjaman Diajukan', 'Pinjaman Diajukan (Rp)', 'rupiah', 0, 1],
@@ -103,8 +115,7 @@ function buildKreditPrint(r, img, auto) {
   const lahirD = new Date(String(r['Tanggal Lahir'] || '').slice(0, 10) + 'T00:00:00');
   const lahir = kEsc(clean(r['Tempat Lahir'])) + ', ' +
     (isNaN(lahirD) ? '' : lahirD.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
-  const checklist = ['FC KTP Suami/Istri', 'FC Kartu Keluarga', 'FC Buku Nikah', 'FC Agunan (Sertifikat, BPKB, dll)',
-    'FC SIUP/TDP/Ket. Usaha', 'FC Bukti Bayar (PLN, PDAM, Telepon, dll)', 'FC Rekening Deposito, Tabungan, dll', 'Lainnya'];
+  
   const sig = (src, nama, lbl) => `<div class="sg"><div class="sb">${src ? `<img src="${src}" alt="">` : ''}</div>
     <div class="sn">( ${kEsc(clean(nama))} )</div><div class="sl">${lbl}</div></div>`;
   const bankLain = clean(r['Pinjaman Bank Lain']) === 'Ada'
@@ -183,7 +194,10 @@ td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
     <div style="margin-top:8px">Catatan Lainnya :</div><div class="ln"></div><div class="ln"></div><div class="ln"></div>
   </div>
   <div class="c"><table><tr><td colspan="2"><b>Cek List Dokumen</b></td></tr>
-    ${checklist.map(x => `<tr><td>${x}</td><td></td></tr>`).join('')}</table>
+    ${KREDIT_DOCS.map(([k, label]) => {
+      const ada = clean(r[k]) === 'Ya' || (k === 'Dok KTP' && img.ktp);
+      return `<tr><td>${label}</td><td style="text-align:center;font-weight:700;font-size:10px">${ada ? '✓' : ''}</td></tr>`;
+    }).join('')}</table>
     <div style="text-align:center;margin-top:14px">Paraf Marketing</div></div>
 </div>
 <img class="bn ft" src="${abs('banner-bpr.png')}" alt="">
