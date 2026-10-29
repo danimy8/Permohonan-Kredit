@@ -259,7 +259,7 @@ $('kreditForm').addEventListener('submit', async e => {
   // tampilkan review
   $('formSection').classList.add('hidden');
   $('reviewSection').classList.remove('hidden');
-  $('preview').srcdoc = buildKreditPrint(data, img, false);
+  $('preview').srcdoc = buildKreditPrint({ ...data, ...docData }, img, false);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   tampilStatus('loading');
