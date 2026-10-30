@@ -330,9 +330,3 @@ function kCompress(file, max) {
     fr.readAsDataURL(file);
   });
 }
- 
-
-
-
-
-Claude finished the response
