@@ -1,3 +1,5 @@
+Claude
+Kredit print · JS
 /* =====================================================================
    kredit-print.js
    Satu sumber kebenaran untuk: daftar field, terbilang, dan cetakan
@@ -5,7 +7,7 @@
    Nama field = nama kolom di Google Sheet.
    Format tiap field: [kolom, label, tipe, opsi, wajib, lebarPenuh]
    ===================================================================== */
-
+ 
 /* [nama kolom di Sheet, label di cetakan] */
 const KREDIT_DOCS = [
   ['Foto KTP',                'FC KTP Suami/Istri'],
@@ -75,10 +77,10 @@ const KREDIT_GROUPS = [
     ['Nama TTD 2', 'Nama Suami / Istri / Orang Tua (penanda tangan, jika ada)', 'text', 0, 0, 1],
    ]},
 ];
-
+ 
 const kEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
+ 
 /* Angka -> kalimat, mis. 15000000 -> "Lima belas juta rupiah" */
 function terbilang(n) {
   n = Math.floor(+n) || 0;
@@ -97,8 +99,10 @@ function terbilang(n) {
   };
   return n ? t(n).replace(/\s+/g, ' ').trim().replace(/^./, c => c.toUpperCase()) + ' rupiah' : '';
 }
-
-/* Cetakan 1 lembar A4 yang meniru formulir kertas.
+ 
+/* Cetakan 1 lembar A4 (margin 10 mm) yang meniru formulir kertas.
+   Isi diregangkan memenuhi seluruh tinggi kertas; kotak Paraf Marketing
+   berdiri sendiri selebar kolom kanan (min. 22 mm).
    r   : objek data (kunci = nama kolom)
    img : { ktp, ttd, ttd2 } berupa data URL / ''
    auto: true -> langsung membuka dialog cetak */
@@ -121,96 +125,120 @@ function buildKreditPrint(r, img, auto) {
   const bankLain = clean(r['Pinjaman Bank Lain']) === 'Ada'
     ? 'Ada - ' + v('Nama Bank Lain') + ', Rp ' + v('Nominal Pinjaman Lain')
     : v('Pinjaman Bank Lain');
-
+ 
   return `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">
 <title>Permohonan Kredit - ${v('Nama Lengkap')}</title>
 <style>
-@page{size:A4 portrait;margin:7mm}
+@page{size:A4 portrait;margin:10mm}
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body{font-family:Arial,sans-serif;font-size:8.5px;color:#111;margin:0}
+html,body{margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:9.5px;color:#111}
+ 
+/* Satu halaman penuh: 297 - 2x10 mm = 277 mm */
+.pg{display:flex;flex-direction:column;height:277mm;overflow:hidden}
 .bn{width:100%;display:block}
-.hd{border:1px solid #222;border-bottom:0;line-height:0}
-.g2{display:grid;grid-template-columns:1fr 1fr;border:1px solid #222;border-top:0}
-.c{padding:3px 6px}.c+.c{border-left:1px solid #222}
-.c .blk{border-bottom:1px solid #222;margin:0 -6px;padding:3px 6px}.c .blk:last-child{border-bottom:0}
-.t{font-weight:700;margin:2px 0}
-.r{display:grid;grid-template-columns:36% 8px 1fr;line-height:14.5px}
-.v{border-bottom:1px dotted #555;font-weight:600;word-break:break-word;min-height:12px}
-.sub{margin-top:4px;font-size:8px}
-.stm{font-size:8px;line-height:1.35}
-.rc{padding-bottom:0;display:flex;flex-direction:column}
-.rc .blk:last-child{flex:1;display:flex;flex-direction:column;padding-bottom:0}
-.rc .sgw{flex:1}
-.sgw{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #222;margin:4px -6px 0}
+.hd{border:1px solid #222;border-bottom:0;line-height:0;flex:0 0 auto}
+ 
+.g2{display:grid;grid-template-columns:1fr 1fr;border:1px solid #222;border-top:0;flex:0 0 auto}
+.g2.top{border-top:1px solid #222}
+.g2.main{flex:1 1 auto}
+.c{padding:5px 8px;display:flex;flex-direction:column}
+.c+.c{border-left:1px solid #222}
+ 
+/* blok-blok di area utama: baris diregangkan merata */
+.main .c{padding:0}
+.main .blk{display:flex;flex-direction:column;padding:4px 8px;border-bottom:1px solid #222}
+.main .blk:last-child{border-bottom:0}
+.t{font-weight:700;font-size:10px;margin:2px 0 3px}
+ 
+.r{display:grid;grid-template-columns:36% 8px 1fr;line-height:15px;align-items:end}
+.main .blk .r{flex:1 1 auto}
+.v{border-bottom:1px dotted #555;font-weight:600;word-break:break-word;min-height:13px}
+ 
+.stm{font-size:9px;line-height:1.4}
+.main .blk.stm{flex:0 0 auto;padding:5px 8px}
+ 
+/* tanda tangan */
+.sgw{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #222;margin:5px -8px 0;flex:1 1 auto}
 .sg{display:flex;flex-direction:column}.sg+.sg{border-left:1px solid #222}
-.sb{flex:1;min-height:62px;display:flex;align-items:center;justify-content:center}
-.sb img{max-width:90%;max-height:58px}.sn{text-align:center;font-size:8px;padding:1px}
-.sl{text-align:center;border-top:1px solid #222;padding:2px;font-size:8.5px}
+.sb{flex:1;min-height:70px;display:flex;align-items:center;justify-content:center}
+.sb img{max-width:90%;max-height:80px}
+.sn{text-align:center;font-size:9px;padding:2px}
+.sl{text-align:center;border-top:1px solid #222;padding:3px;font-size:9.5px}
+ 
+/* bagian bank */
 .adm{display:flex;align-items:flex-end;gap:6px;padding-right:10%}
-.adm i{flex:1;border-bottom:1px dotted #555;height:12px}
-.ln{border-bottom:1px dotted #555;height:17px}
-table{width:100%;border-collapse:collapse;font-size:7.5px}
-td{border:1px solid #222;padding:2px 4px;height:15px}td+td{width:40px}
-.ft{margin-top:6px}
+.adm i{flex:1;border-bottom:1px dotted #555;height:13px}
+.ln{border-bottom:1px dotted #555;height:22px}
+ 
+/* checklist + paraf marketing */
+table{width:100%;border-collapse:collapse;font-size:8.5px}
+td{border:1px solid #222;padding:2px 5px;height:17px}
+td+td{width:44px}
+.pf{flex:1 1 auto;min-height:22mm;margin-top:7px;border:1px solid #222;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font-size:9.5px}
+ 
+.ft{margin-top:6px;flex:0 0 auto}
 </style></head><body>
+<div class="pg">
 <div class="hd"><img class="bn" src="${abs('header-kredit.png')}" alt="PT. BPR Araya Arta - Permohonan Kredit"></div>
-
-<div class="g2" style="border-top:1px solid #222">
+ 
+<div class="g2 top">
   <div class="c">${row('Pinjaman diajukan', 'Rp ' + v('Pinjaman Diajukan'))}${row('Jangka waktu', v('Jangka Waktu') + ' bulan')}${row('Sanggup mengangsur', 'Rp ' + v('Sanggup Mengangsur') + ' /bulan')}</div>
-  <div class="c"><b>Terbilang :</b> <i>${v('Terbilang')}</i></div>
+  <div class="c"><div><b>Terbilang :</b> <i>${v('Terbilang')}</i></div></div>
 </div>
-
-<div class="g2">
+ 
+<div class="g2 main">
   <div class="c">
-    <div class="blk"><div class="t">DATA PEMOHON</div>
+    <div class="blk" style="flex:10 1 auto"><div class="t">DATA PEMOHON</div>
       ${R('Nama (sesuai KTP)', 'Nama Lengkap')}${R('Nama Panggilan', 'Nama Panggilan')}${R('Jenis Kelamin', 'Jenis Kelamin')}
       ${row('Tempat &amp; tgl lahir', lahir)}${R('Pendidikan Terakhir', 'Pendidikan')}${R('Status Perkawinan', 'Status Perkawinan')}
       ${R('Nama Istri/Suami', 'Nama Pasangan')}${R('Nama Ibu Kandung', 'Nama Ibu Kandung')}${R('Jumlah tanggungan', 'Jumlah Tanggungan')}</div>
-    <div class="blk"><div class="t">TEMPAT TINGGAL</div>
+    <div class="blk" style="flex:11 1 auto"><div class="t">TEMPAT TINGGAL</div>
       ${R('Alamat Saat Ini', 'Alamat')}${R('RT / RW', 'RT/RW')}${R('Kelurahan / Desa', 'Kelurahan/Desa')}${R('Kecamatan', 'Kecamatan')}
       ${R('Kota / Kabupaten', 'Kota/Kabupaten')}${R('No. HP', 'No. HP')}${R('Status Tempat Tinggal', 'Status Tempat Tinggal')}
       ${R('Lama Menempati Rumah', 'Lama Menempati')}${R('Alamat Sesuai KTP', 'Alamat KTP')}</div>
-    <div class="blk"><div class="t">Keluarga/ Kerabat yang dapat dihubungi</div>
+    <div class="blk" style="flex:5 1 auto"><div class="t">Keluarga/ Kerabat yang dapat dihubungi</div>
       ${R('Nama', 'Kerabat Nama')}${R('No HP', 'Kerabat No HP')}${R('Alamat', 'Kerabat Alamat')}${R('Hubungan', 'Kerabat Hubungan')}</div>
   </div>
   <div class="c rc">
-    <div class="blk"><div class="t">PENGGUNAAN</div>
+    <div class="blk" style="flex:6 1 auto"><div class="t">PENGGUNAAN</div>
       ${R('Pinjaman untuk', 'Tujuan Pinjaman')}${R('Usaha Utama', 'Usaha Utama')}${R('Usaha Tambahan', 'Usaha Tambahan')}
       ${row('Mulai Usaha/ Bekerja', 'Tahun ' + v('Mulai Usaha/Bekerja'))}${R('No. NPWP (jika ada)', 'NPWP')}${row('Pinjaman Bank lain', bankLain)}</div>
-    <div class="blk"><div class="t">JAMINAN</div>
+    <div class="blk" style="flex:6 1 auto"><div class="t">JAMINAN</div>
       ${R('Jenis jaminan', 'Jenis Jaminan')}${R('Status jaminan', 'Status Jaminan')}${R('Jaminan digunakan oleh', 'Jaminan Digunakan Oleh')}
       ${R('Hubungan dengan pemilik', 'Hubungan Pemilik')}${R('Jumlah jaminan', 'Jumlah Jaminan')}${R('Nama jaminan', 'Nama Jaminan')}</div>
     <div class="blk stm">Atas permohonan dan data yang saya berikan, Bank diijinkan untuk mengakses informasi keuangan milik saya dan pihak terkait dalam Sistem Layanan Informasi Keuangan (SLIK) Otoritas Jasa Keuangan (OJK)</div>
-    <div class="blk">Tanggal : ${kEsc(tgl)}
+    <div class="blk" style="flex:7 1 auto">Tanggal : ${kEsc(tgl)}
       <div class="sgw">${sig(img.ttd, r['Nama Lengkap'], 'Pemohon')}${sig(img.ttd2, r['Nama TTD 2'], 'Suami/Istri/Orang Tua')}</div></div>
   </div>
 </div>
-
+ 
 <div class="g2">
   <div class="c">
     <div class="t">DI ISI OLEH BANK</div>
     ${row('Nama Marketing', '')}<div class="r"><span>Catatan Administrasi</span><span>:</span><span class="adm"><i></i><b>Lama / Baru</b></span></div>
-    <p class="stm" style="margin:4px 0">Dengan menandatangani formulir ini, saya menyatakan telah melakukan verifikasi dan konfirmasi data pemohon.</p>
-    <div style="margin-top:8px">Catatan Lainnya :</div><div class="ln"></div><div class="ln"></div><div class="ln"></div>
+    <p class="stm" style="margin:6px 0">Dengan menandatangani formulir ini, saya menyatakan telah melakukan verifikasi dan konfirmasi data pemohon.</p>
+    <div style="margin:8px 0 2px">Catatan Lainnya :</div><div class="ln"></div><div class="ln"></div><div class="ln"></div>
   </div>
   <div class="c"><table><tr><td colspan="2"><b>Cek List Dokumen</b></td></tr>
     ${KREDIT_DOCS.map(([k, label]) => {
       const ada = clean(r[k]) !== '' || (k === 'Foto KTP' && !!img.ktp);
-      return `<tr><td>${label}</td><td style="text-align:center;font-weight:700;font-size:10px">${ada ? '✓' : ''}</td></tr>`;
+      return `<tr><td>${label}</td><td style="text-align:center;font-weight:700;font-size:11px">${ada ? '✓' : ''}</td></tr>`;
     }).join('')}</table>
-    <div style="text-align:center;margin-top:14px">Paraf Marketing</div></div>
+    <div class="pf">Paraf Marketing</div></div>
 </div>
 <img class="bn ft" src="${abs('banner-bpr.png')}" alt="">
+</div>
 ${auto ? '<script>window.onload=function(){setTimeout(function(){window.print()},500)}<\/script>' : ''}
 </body></html>`;
 }
-
-
+ 
+ 
 /* =====================================================================
    Helper form bersama (dipakai dashboard untuk Tambah / Edit data)
    ===================================================================== */
 const kId = (pre, h) => pre + h.replace(/\W/g, '_');
-
+ 
 function kFieldHtml([h, l, t, o, req, full, dep], pre) {
   const a = `id="${kId(pre, h)}" data-h="${kEsc(h)}" data-t="${t}" ${req ? 'data-req="1"' : ''} ${req && !dep ? 'required' : ''}`;
   let el;
@@ -224,7 +252,7 @@ function kFieldHtml([h, l, t, o, req, full, dep], pre) {
   const d = dep ? ` data-dep="${kEsc(dep[0])}" data-depval="${kEsc(dep[1])}" hidden` : '';
   return `<div class="field ${full ? 'full' : ''}"${d}><label>${kEsc(l)}${req ? ' *' : ''}</label>${el}</div>`;
 }
-
+ 
 /* Tampilkan / sembunyikan field yang bergantung pada field lain */
 function kDeps(root) {
    root.querySelectorAll('[data-dep]').forEach(w => {
@@ -236,7 +264,7 @@ function kDeps(root) {
       if (!show) i.value = '';
    });
 }
-
+ 
 /* Pasang perilaku: format rupiah, hanya angka, terbilang otomatis, kolom "Lainnya" */
 function kBind(root) {
   root.addEventListener('input', e => {
@@ -255,7 +283,7 @@ function kBind(root) {
     if (o.hidden) o.value = '';
   });
 }
-
+ 
 /* Ambil semua isian -> { data, bad } ; bad = elemen wajib yang masih kosong */
 function kCollect(root) {
   const data = {}; let bad = null;
@@ -269,7 +297,7 @@ function kCollect(root) {
   data['Terbilang'] = terbilang((data['Pinjaman Diajukan'] || '').replace(/\D/g, '')) || '-';
   return { data, bad };
 }
-
+ 
 /* Isi form dari satu record (r = null untuk form kosong) */
 function kFill(root, r) {
   root.querySelectorAll('[data-h]').forEach(el => {
@@ -283,7 +311,7 @@ function kFill(root, r) {
   });
   kDeps(root);
 }
-
+ 
 /* File gambar -> data URL JPEG yang sudah dikecilkan */
 function kCompress(file, max) {
   return new Promise((res, rej) => {
@@ -304,3 +332,9 @@ function kCompress(file, max) {
     fr.readAsDataURL(file);
   });
 }
+ 
+
+
+
+
+Claude finished the response
