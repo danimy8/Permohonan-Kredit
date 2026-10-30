@@ -1,5 +1,3 @@
-Claude
-Kredit print · JS
 /* =====================================================================
    kredit-print.js
    Satu sumber kebenaran untuk: daftar field, terbilang, dan cetakan
