@@ -123,9 +123,12 @@ function makePad(cv, ph) {
     cv.width = r.width; cv.height = r.height;
     c.lineWidth = 2.5; c.lineCap = c.lineJoin = 'round'; c.strokeStyle = '#0f172a';
   };
-  const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-  cv.addEventListener('pointerdown', e => { drawing = true; signed = true; ph.classList.add('hidden'); cv.setPointerCapture(e.pointerId); c.beginPath(); c.moveTo(...pos(e)); });
-  cv.addEventListener('pointermove', e => { if (!drawing) return; c.lineTo(...pos(e)); c.stroke(); });
+  const pos = e => {
+  const r = cv.getBoundingClientRect();
+  return [(e.clientX - r.left) * cv.width / r.width, (e.clientY - r.top) * cv.height / r.height];
+  };
+  cv.addEventListener('pointerdown', e => { drawing = true; cv.setPointerCapture(e.pointerId); c.beginPath(); c.moveTo(...pos(e)); });
+  cv.addEventListener('pointermove', e => { if (!drawing) return; signed = true; ph.classList.add('hidden'); c.lineTo(...pos(e)); c.stroke(); });
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => cv.addEventListener(t, () => drawing = false));
   size();
   window.addEventListener('resize', () => { if (!signed) size(); });
@@ -215,7 +218,7 @@ function tampilStatus(state) {
 }
 
 /* ===== Kirim ke Google Sheet ===== */
-  let lastPayload = null, submissionId = null, isSubmitting = false, lastError = '';
+  let lastPayload = null, submissionId = null, isSubmitting = false, lastError = '', saved = false;
 async function kirim(payload) {
   lastPayload = payload; lastError = '';
   const ctl = new AbortController();
@@ -240,8 +243,13 @@ async function kirim(payload) {
   }
 }
 async function kirimUlang() {
-  if (!lastPayload) return;
-  tampilStatus('loading'); tampilStatus(await kirim(lastPayload) ? 'ok' : 'gagal');
+  if (!lastPayload || isSubmitting) return;
+  isSubmitting = true; $('btnEdit').disabled = true;
+  try {
+    tampilStatus('loading');
+    saved = await kirim(lastPayload);
+    tampilStatus(saved ? 'ok' : 'gagal');
+  } finally { isSubmitting = false; $('btnEdit').disabled = false; }
 }
 
 /* ===== Submit ===== */
@@ -269,6 +277,7 @@ $('kreditForm').addEventListener('submit', async e => {
 
   isSubmitting = true;
   try {
+    saved = false;
     data['Tanggal Pengajuan'] = new Date().toLocaleDateString('en-CA');   // YYYY-MM-DD, otomatis
     const img = { ktp: docData['Foto KTP'], ttd: pad1.data(), ttd2: pad2.data() };
     if (!submissionId) submissionId = (crypto.randomUUID && crypto.randomUUID()) || (Date.now() + '-' + Math.random().toString(36).slice(2));
@@ -279,9 +288,10 @@ $('kreditForm').addEventListener('submit', async e => {
     $('preview').srcdoc = buildKreditPrint({ ...data, ...docData }, img, false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    $('btnEdit').disabled = true;
     tampilStatus('loading');
-    const ok = await kirim({ 'Submission ID': submissionId, ...data, ...docData, 'Nama Dokumen Lainnya': $('docName').value.trim() || '-', 'Tanda Tangan': img.ttd, 'Tanda Tangan 2': img.ttd2 });
-    tampilStatus(ok ? 'ok' : 'gagal');
+    saved = await kirim({ 'Submission ID': submissionId, ...data, ...docData, 'Nama Dokumen Lainnya': $('docName').value.trim() || '-', 'Tanda Tangan': img.ttd, 'Tanda Tangan 2': img.ttd2 });
+    tampilStatus(saved ? 'ok' : 'gagal');
   } catch (err) {
     console.error(err);
     $('reviewSection').classList.add('hidden');
@@ -289,14 +299,17 @@ $('kreditForm').addEventListener('submit', async e => {
     msg('Terjadi kesalahan: ' + err.message);
   } finally {
     isSubmitting = false;
+    $('btnEdit').disabled = false;
   }
 });
 
 $('btnPrint').onclick = () => { const w = $('preview').contentWindow; w.focus(); w.print(); };
 $('btnEdit').onclick = () => {
-  submissionId = null;
+  if (saved && !confirm('Data sudah tersimpan. Kalau diedit lalu disimpan lagi, akan tercatat sebagai data BARU (dobel). Lanjutkan?')) return;
+  saved = false; submissionId = null;
   $('reviewSection').classList.add('hidden');
   $('formSection').classList.remove('hidden');
+  window.dispatchEvent(new Event('resize'));
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 </script>
