@@ -98,6 +98,7 @@
 </div>
 
 <script src="kredit-print.js"></script>
+<script src="kredit-shared.js"></script>
 <script>
 /* ===== Konfigurasi ===== */
 const API_URL = 'https://script.google.com/macros/s/AKfycbyjVAtb0CsgLwctDZZxBqOYwoLYeIBZ-kdXGmpckFlUwRkWKcihIEMh4QfAxywy30Xkkw/exec';
@@ -285,12 +286,25 @@ $('kreditForm').addEventListener('submit', async e => {
     // tampilkan review
     $('formSection').classList.add('hidden');
     $('reviewSection').classList.remove('hidden');
-    $('preview').srcdoc = buildKreditPrint({ ...data, ...docData }, img, false);
+    const img = { ktp: docData['Foto KTP'], ttd: pad1.data(), ttd2: pad2.data() };
+    if (!submissionId) submissionId = (crypto.randomUUID && crypto.randomUUID()) || (Date.now() + '-' + Math.random().toString(36).slice(2));
+
+    // satu objek data untuk preview DAN simpan
+    const record = {
+      'Submission ID': submissionId, ...data, ...docData,
+      'Nama Dokumen Lainnya': $('docName').value.trim() || '-',
+      'Tanda Tangan': img.ttd, 'Tanda Tangan 2': img.ttd2
+    };
+
+    // tampilkan review
+    $('formSection').classList.add('hidden');
+    $('reviewSection').classList.remove('hidden');
+    $('preview').srcdoc = kRender(record, img, false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     $('btnEdit').disabled = true;
     tampilStatus('loading');
-    saved = await kirim({ 'Submission ID': submissionId, ...data, ...docData, 'Nama Dokumen Lainnya': $('docName').value.trim() || '-', 'Tanda Tangan': img.ttd, 'Tanda Tangan 2': img.ttd2 });
+    saved = await kirim(record);
     tampilStatus(saved ? 'ok' : 'gagal');
   } catch (err) {
     console.error(err);
