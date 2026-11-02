@@ -274,18 +274,11 @@ $('kreditForm').addEventListener('submit', async e => {
   if (!pad1.signed()) { $('sig1Err').classList.remove('hidden'); return $('pad1').scrollIntoView({ block: 'center' }); }
   if (!docData['Foto KTP']) { const er = $('de0'); er.textContent = 'Foto KTP wajib diupload.'; er.classList.remove('hidden'); return $('docs').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   if (docData['Scan Dokumen Lainnya'] && !$('docName').value.trim()) { msg('Ketik nama dokumen untuk file "Lainnya".'); $('docName').focus(); return $('docName').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-
-
-  isSubmitting = true;
+  
+    isSubmitting = true;
   try {
     saved = false;
     data['Tanggal Pengajuan'] = new Date().toLocaleDateString('en-CA');   // YYYY-MM-DD, otomatis
-    const img = { ktp: docData['Foto KTP'], ttd: pad1.data(), ttd2: pad2.data() };
-    if (!submissionId) submissionId = (crypto.randomUUID && crypto.randomUUID()) || (Date.now() + '-' + Math.random().toString(36).slice(2));
-
-    // tampilkan review
-    $('formSection').classList.add('hidden');
-    $('reviewSection').classList.remove('hidden');
     const img = { ktp: docData['Foto KTP'], ttd: pad1.data(), ttd2: pad2.data() };
     if (!submissionId) submissionId = (crypto.randomUUID && crypto.randomUUID()) || (Date.now() + '-' + Math.random().toString(36).slice(2));
 
@@ -315,8 +308,8 @@ $('kreditForm').addEventListener('submit', async e => {
     isSubmitting = false;
     $('btnEdit').disabled = false;
   }
-});
-
+  });
+  
 $('btnPrint').onclick = () => { const w = $('preview').contentWindow; w.focus(); w.print(); };
 $('btnEdit').onclick = () => {
   if (saved && !confirm('Data sudah tersimpan. Kalau diedit lalu disimpan lagi, akan tercatat sebagai data BARU (dobel). Lanjutkan?')) return;
